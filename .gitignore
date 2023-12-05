@@ -1,0 +1,3 @@
+*.pem
+/mkcert*
+.vscode
