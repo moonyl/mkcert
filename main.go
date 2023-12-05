@@ -91,19 +91,20 @@ func main() {
 	}
 	log.SetFlags(0)
 	var (
-		installFlag   = flag.Bool("install", false, "")
-		uninstallFlag = flag.Bool("uninstall", false, "")
-		pkcs12Flag    = flag.Bool("pkcs12", false, "")
-		ecdsaFlag     = flag.Bool("ecdsa", false, "")
-		clientFlag    = flag.Bool("client", false, "")
-		helpFlag      = flag.Bool("help", false, "")
-		carootFlag    = flag.Bool("CAROOT", false, "")
-		csrFlag       = flag.String("csr", "", "")
-		certFileFlag  = flag.String("cert-file", "", "")
-		keyFileFlag   = flag.String("key-file", "", "")
-		p12FileFlag   = flag.String("p12-file", "", "")
-		versionFlag   = flag.Bool("version", false, "")
-		keyLenFlag    = flag.Int("keylen", 2048, "")
+		installFlag    = flag.Bool("install", false, "")
+		uninstallFlag  = flag.Bool("uninstall", false, "")
+		pkcs12Flag     = flag.Bool("pkcs12", false, "")
+		ecdsaFlag      = flag.Bool("ecdsa", false, "")
+		clientFlag     = flag.Bool("client", false, "")
+		helpFlag       = flag.Bool("help", false, "")
+		carootFlag     = flag.Bool("CAROOT", false, "")
+		csrFlag        = flag.String("csr", "", "")
+		certFileFlag   = flag.String("cert-file", "", "")
+		keyFileFlag    = flag.String("key-file", "", "")
+		p12FileFlag    = flag.String("p12-file", "", "")
+		versionFlag    = flag.Bool("version", false, "")
+		keyLenFlag     = flag.Int("keylen", 2048, "")
+		expireYearFlag = flag.Int("ex-year", 2, "")
 	)
 	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
@@ -146,10 +147,14 @@ func main() {
 	if *keyLenFlag < 0 {
 		log.Fatalln("ERROR: key length can't be less than 0")
 	}
+	if *expireYearFlag < 0 {
+		log.Fatalln("ERROR: expire year can't be less than 0")
+	}
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
-		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag, keyLen: *keyLenFlag,
+		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		keyLen: *keyLenFlag, expireYear: *expireYearFlag,
 	}).Run(flag.Args())
 }
 
@@ -171,7 +176,8 @@ type mkcert struct {
 	// https://github.com/golang/go/issues/24540 (thanks, myself)
 	ignoreCheckFailure bool
 
-	keyLen int
+	keyLen     int
+	expireYear int
 }
 
 func (m *mkcert) Run(args []string) {
